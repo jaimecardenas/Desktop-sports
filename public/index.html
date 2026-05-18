@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="DeskTop Sports">
+<title>DeskTop Sports</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#008080;font-family:'VT323',monospace;overflow:hidden}
+.raised{border:2px solid;border-color:#e4f2fc #4a7090 #4a7090 #e4f2fc}
+.sunken{border:2px solid;border-color:#4a7090 #e4f2fc #e4f2fc #4a7090}
+#root{display:flex;flex-direction:column;height:100vh;padding:5px;gap:3px}
+#taskbar{height:30px;background:#ccdde8;flex-shrink:0;display:flex;align-items:center;gap:3px;padding:0 3px;border:2px solid;border-color:#e4f2fc #4a7090 #4a7090 #e4f2fc}
+#start-btn{background:linear-gradient(180deg,#2870ce,#0838a0);color:#fff;font-family:'VT323',monospace;font-size:14px;padding:2px 14px;font-weight:bold;border:2px solid;border-color:#5090e0 #0828a0 #0828a0 #5090e0;cursor:pointer}
+#tb-app{display:flex;align-items:center;gap:5px;padding:2px 8px;background:#b0c8d8;font-size:13px;color:#000818;border:2px solid;border-color:#4a7090 #e4f2fc #e4f2fc #4a7090}
+#live-badge{padding:1px 9px;background:#fff8e0;border:1px solid #c09030;font-size:13px;color:#c03000;display:none;animation:pulse 2s infinite}
+#clock{padding:1px 10px;background:#f0f8ff;font-size:12px;color:#1c3c60;margin-left:auto;border:2px solid;border-color:#4a7090 #e4f2fc #e4f2fc #4a7090}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+#win{flex:1;display:flex;flex-direction:column;background:#ccdde8;min-height:0;overflow:hidden;border:2px solid;border-color:#e4f2fc #4a7090 #4a7090 #e4f2fc;box-shadow:3px 3px 0 #2a5070}
+#titlebar{background:linear-gradient(90deg,#08207a,#1050bb 50%,#2878d8);padding:3px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#titlebar span{font-size:15px;color:#fff;letter-spacing:1px;text-shadow:1px 1px 0 #06102a}
+.wbtn{width:16px;height:13px;background:#ccdde8;font-size:9px;display:inline-flex;align-items:center;justify-content:center;cursor:default;border:2px solid;border-color:#e4f2fc #4a7090 #4a7090 #e4f2fc}
+#menubar{display:flex;background:#b0c8d8;border-bottom:1px solid #4a7090;padding:0 2px;flex-shrink:0}
+#menubar span{font-size:13px;color:#000818;padding:2px 10px;cursor:default}
+#toolbar{display:flex;align-items:center;gap:6px;padding:3px 6px;background:#b0c8d8;border-bottom:1px solid #4a7090;flex-shrink:0}
+#refresh-btn{font-family:'VT323',monospace;font-size:14px;padding:2px 10px;background:#ccdde8;color:#000818;cursor:pointer;border:2px solid;border-color:#e4f2fc #4a7090 #4a7090 #e4f2fc}
+#refresh-btn:active{border-color:#4a7090 #e4f2fc #e4f2fc #4a7090}
+#status-txt{font-size:12px;color:#1c3c60;flex:1}
+#tabs{display:flex;flex-wrap:wrap;gap:2px;padding:3px 4px 0;background:#a0b8cc;border-bottom:2px solid #4a7090;flex-shrink:0}
+.tab{display:flex;align-items:center;gap:2px;cursor:pointer;padding:3px 8px;font-family:'VT323',monospace;font-size:12px;color:#243c58;background:#88a8c0;border-top:2px solid #688aaa;border-left:2px solid #688aaa;border-right:2px solid #284860;border-bottom:none;white-space:nowrap;flex-shrink:0}
+.tab.on{background:#ccdde8;color:#0048a0;border-top:2px solid #e4f2fc;border-left:2px solid #e4f2fc;border-right:2px solid #4a7090;border-bottom:2px solid #ccdde8;margin-bottom:-2px;z-index:2;position:relative}
+.tab .cnt{font-size:11px;padding:0 4px;background:#4870a0;color:#fff}
+.tab.on .cnt{background:#0848a0}
+.tab .dot{font-size:10px;color:#c03000;animation:pulse 2s infinite}
+#ticker{display:flex;height:20px;background:#071838;border-bottom:1px solid #2a5070;overflow:hidden;flex-shrink:0;align-items:center}
+#ticker-lbl{background:#bb0000;color:#fff;padding:0 8px;font-size:13px;letter-spacing:2px;height:100%;display:flex;align-items:center;border-right:2px solid #ff2020;flex-shrink:0}
+#ticker-txt{white-space:nowrap;color:#70c4ff;font-size:13px;animation:tk 120s linear infinite;display:inline-block;letter-spacing:.4px}
+@keyframes tk{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+#col-hdr{display:flex;padding:3px 12px;background:linear-gradient(180deg,#a0b8cc,#8aaabf);border-bottom:2px solid #4a7090;flex-shrink:0;font-size:11px;color:#1c3c60}
+#rows{flex:1;overflow-y:auto;background:#f0f8ff;border:2px solid;border-color:#4a7090 #e4f2fc #e4f2fc #4a7090}
+.row{display:flex;align-items:center;min-height:40px;padding:0 12px;border-bottom:1px solid #c4d8ec;border-left:5px solid transparent;transition:background .08s}
+.row.live{background:#fff8e4!important;border-left-color:#c03000}
+.row.final{border-left-color:#4a7090}
+.row:nth-child(even){background:#e8f2fb}
+.row:hover{background:#e4effa!important}
+.badge{font-size:10px;padding:2px 5px;color:#fff;white-space:nowrap;letter-spacing:.4px}
+.team{font-size:20px;text-align:center;width:52px;flex-shrink:0;color:#000818;letter-spacing:1px}
+.team.w{color:#0a1870;font-weight:bold}
+.sc-vs{width:36px;flex-shrink:0;text-align:center}
+.score{font-size:18px;letter-spacing:1px}
+.vs{font-size:13px;color:#7090b0;letter-spacing:1px}
+.det{font-size:9px;color:#c03000;line-height:1}
+.time-col{width:110px;flex-shrink:0;text-align:center;font-size:15px;letter-spacing:.5px;white-space:nowrap}
+.time-live{color:#c03000}.time-final{color:#4a7090}.time-sched{color:#0048a0}
+.pills{width:160px;flex-shrink:0;display:flex;flex-wrap:wrap;gap:2px;justify-content:flex-end;padding:0 2px}
+.pill{font-size:11px;padding:1px 6px;color:#fff;border:1px solid rgba(0,0,0,.25);white-space:nowrap;letter-spacing:.3px}
+#empty{padding:30px;text-align:center;font-size:15px;color:#7090b0}
+#statusbar{display:flex;gap:2px;padding:2px 3px;background:#b0c8d8;border-top:2px solid #4a7090;flex-shrink:0}
+.sb{padding:1px 8px;background:#f0f8ff;font-size:11px;color:#1c3c60;border:2px solid;border-color:#4a7090 #e4f2fc #e4f2fc #4a7090}
+#rows::-webkit-scrollbar{width:16px}
+#rows::-webkit-scrollbar-track{background:#b0c8d8}
+#rows::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#ccdde8,#b0c8d8);border:2px solid;border-color:#e4f2fc #4a7090 #4a7090 #e4f2fc}
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="taskbar">
+    <button id="start-btn">⊞ Start</button>
+    <div style="width:1px;height:20px;background:#4a7090;margin:0 2px"></div>
+    <div id="tb-app">📺 DeskTop Sports</div>
+    <span id="live-badge">● <span id="live-n">0</span> LIVE</span>
+    <div id="clock">--:--:--</div>
+  </div>
+  <div id="win">
+    <div id="titlebar">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span>📺</span>
+        <span>DeskTop Sports — <span id="title-date">Loading…</span></span>
+      </div>
+      <div style="display:flex;gap:2px">
+        <div class="wbtn">─</div><div class="wbtn">□</div><div class="wbtn">✕</div>
+      </div>
+    </div>
+    <div id="menubar"><span>File</span><span>View</span><span>Sports</span><span>Help</span></div>
+    <div id="toolbar">
+      <button id="refresh-btn" onclick="loadGames()">⟳ Refresh Scores</button>
+      <div style="width:1px;height:18px;background:#4a7090"></div>
+      <span id="status-txt">Loading…</span>
+    </div>
+    <div id="tabs"></div>
+    <div id="ticker">
+      <div id="ticker-lbl">◆ LIVE</div>
+      <div style="flex:1;overflow:hidden"><span id="ticker-txt">Loading…</span></div>
+    </div>
+    <div id="col-hdr">
+      <span style="width:58px;flex-shrink:0">League</span>
+      <span style="width:52px;flex-shrink:0;text-align:center">Away</span>
+      <span style="width:36px;flex-shrink:0"></span>
+      <span style="width:52px;flex-shrink:0;text-align:center">Home</span>
+      <span style="flex:1"></span>
+      <span style="width:110px;flex-shrink:0;text-align:center">Time (ET)</span>
+      <span style="width:160px;flex-shrink:0;text-align:right">Watch On</span>
+    </div>
+    <div id="rows"><div id="empty">⟳ Loading today's games…</div></div>
+    <div id="statusbar">
+      <div class="sb" id="sb1" style="flex:3">Loading…</div>
+      <div class="sb" id="sb2" style="flex:1">0 live</div>
+      <div class="sb" style="flex:2">Auto · 60s · ESPN</div>
+    </div>
+  </div>
+</div>
+<script>
+var SBG={NHL:"#003380",MLB:"#c0001a",NBA:"#b8460a",NFL:"#1a3a70",MLS:"#005293",EPL:"#3d0099",ENG2:"#1a3d8a",LALIGA:"#c8000a",UCL:"#0a2060",LIGAMX:"#006847",LIGAEX:"#004030",ARG1:"#4a8ac0",WNBA:"#552299",PWHL:"#500055",NWSL:"#004080",MLV:"#8b0057",MLR:"#8b2000",NCAAVB:"#1a3d8a","USL-C":"#1a5c1a","USL-1":"#2a7a2a","USL-2":"#3a903a","USL-W":"#7a1a6a"};
+var SCLR={"ESPN+":"#c53000","ESPN":"#cc0000","ESPN2":"#cc0000","TNT":"#5500aa","Max":"#3300cc","ABC":"#003399","Apple TV":"#111","Peacock":"#d07000","USA Net":"#1a6aaa","Prime Video":"#0077bb","MLB.TV":"#002b6e","NHL Net":"#002b6e","Fox":"#cc2200","FOX":"#cc2200","CBS":"#003399","NBC":"#aa6a00","TBS":"#007070","Victory+":"#1a4020","CBS Sports":"#003399","Univision":"#0033aa","TUDN":"#cc0022","ViX":"#1a8a3a","ESPN Deportes":"#cc3300","TyC Sports":"#0a4a8a","Paramount+":"#1a5cb8"};
+var TABS=[{k:"ALL",l:"All"},{k:"NHL",l:"NHL"},{k:"MLB",l:"MLB"},{k:"NBA",l:"NBA"},{k:"NFL",l:"NFL"},{k:"PWHL",l:"PWHL"},{k:"NWSL",l:"NWSL"},{k:"WNBA",l:"WNBA"},{k:"MLV",l:"MLV"},{k:"MLR",l:"MLR"},{k:"NCAAVB",l:"NCAA VB"},{k:"MLS",l:"MLS"},{k:"USL-C",l:"USL-C"},{k:"USL-1",l:"USL-1"},{k:"USL-2",l:"USL-2"},{k:"USL-W",l:"USL-W"},{k:"EPL",l:"EPL"},{k:"ENG2",l:"ENG 2"},{k:"UCL",l:"Champ.L"},{k:"LALIGA",l:"La Liga"},{k:"LIGAMX",l:"Liga MX"},{k:"LIGAEX",l:"Liga Exp"},{k:"ARG1",l:"Argentina"}];
+var games=[],activeTab="ALL";
+
+setInterval(function(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});},1000);
+
+function etToMins(et){if(!et||et==="FT")return 9999;var m=et.match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return 9999;var h=parseInt(m[1]),n=parseInt(m[2]),p=m[3].toUpperCase();if(p==="PM"&&h!==12)h+=12;if(p==="AM"&&h===12)h=0;return h*60+n;}
+
+function loadGames(){
+  var btn=document.getElementById("refresh-btn");
+  btn.textContent="⟳ Loading…";btn.disabled=true;
+  fetch("/api/scores?t="+Date.now())
+    .then(function(r){return r.json();})
+    .then(function(data){
+      games=data.games||[];
+      var ts=new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+      document.getElementById("title-date").textContent=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+      document.getElementById("status-txt").textContent="Updated "+ts+" · "+games.length+" games";
+      render();
+      btn.textContent="⟳ Refresh Scores";btn.disabled=false;
+    })
+    .catch(function(){
+      document.getElementById("status-txt").textContent="Error — tap Refresh to retry";
+      btn.textContent="⟳ Refresh Scores";btn.disabled=false;
+    });
+}
+
+function render(){
+  var O={live:0,scheduled:1,final:2};
+  var vis=(activeTab==="ALL"?games:games.filter(function(g){return g.sport===activeTab;})).slice().sort(function(a,b){return(O[a.status]!==undefined?O[a.status]:1)-(O[b.status]!==undefined?O[b.status]:1)||etToMins(a.et)-etToMins(b.et);});
+  var liveN=games.filter(function(g){return g.status==="live";}).length;
+  var lb=document.getElementById("live-badge");
+  lb.style.display=liveN>0?"inline-block":"none";
+  document.getElementById("live-n").textContent=liveN;
+  var te=document.getElementById("tabs");te.innerHTML="";
+  TABS.forEach(function(t){
+    var cnt=t.k==="ALL"?games.length:games.filter(function(g){return g.sport===t.k;}).length;
+    var hl=games.some(function(g){return g.sport===t.k&&g.status==="live";});
+    var on=activeTab===t.k;
+    var d=document.createElement("div");
+    d.className="tab"+(on?" on":"");
+    d.innerHTML="<span>"+t.l+"</span>"+(hl?"<span class='dot'>●</span>":"")+"<span class='cnt'>"+cnt+"</span>";
+    d.onclick=(function(k){return function(){activeTab=k;render();};})(t.k);
+    te.appendChild(d);
+  });
+  var tt=games.map(function(g){return g.sport+": "+g.awayFull+" vs "+g.homeFull+(g.as&&g.hs?" "+g.as+"-"+g.hs:"")+" · "+g.et+" ET";}).join("   ◆   ")||"No games today";
+  document.getElementById("ticker-txt").textContent=tt+"   ◆   "+tt;
+  var re=document.getElementById("rows");
+  if(vis.length===0){re.innerHTML="<div id='empty'>"+(games.length===0?"Could not load — tap Refresh":"No "+(activeTab==="ALL"?"games":activeTab+" games")+" today")+"</div>";return;}
+  re.innerHTML="";
+  vis.forEach(function(g,i){
+    var live=g.status==="live",fin=g.status==="final",sc=g.as!==""&&g.hs!=="";
+    var aW=sc&&Number(g.as)>Number(g.hs),hW=sc&&Number(g.hs)>Number(g.as);
+    var bg=live?"#fff8e4":fin?"#e8f0f8":i%2===0?"#f0f8ff":"#e8f2fb";
+    var sh=(live||fin)&&sc?"<span class='score'><span style='color:"+(aW?"#0a1870":"#8090b0")+"'>"+g.as+"</span><span style='color:#c0ccd8;margin:0 2px'>-</span><span style='color:"+(hW?"#0a1870":"#8090b0")+"'>"+g.hs+"</span></span>"+(live&&g.detail?"<div class='det'>"+g.detail+"</div>":""):"<span class='vs'>vs</span>";
+    var pp=(g.streams||[]).slice(0,3).map(function(s){return"<span class='pill' style='background:"+(SCLR[s]||"#444")+"'>"+s+"</span>";}).join("");
+    var row=document.createElement("div");
+    row.className="row"+(live?" live":fin?" final":"");
+    row.style.background=bg;
+    row.innerHTML="<div style='width:58px;flex-shrink:0'><span class='badge' style='background:"+(SBG[g.sport]||"#333")+"'>"+g.sport+"</span></div><div class='team"+(aW?" w":"")+"' title='"+g.awayFull+"'>"+g.away+"</div><div class='sc-vs'>"+sh+"</div><div class='team"+(hW?" w":"")+"' title='"+g.homeFull+"'>"+g.home+"</div><div style='flex:1'></div><div class='time-col time-"+(live?"live":fin?"final":"sched")+"'>"+(live?"● LIVE":fin?"✓ FINAL":g.et+" ET")+"</div><div class='pills'>"+pp+"</div>";
+    re.appendChild(row);
+  });
+  document.getElementById("sb1").textContent=(activeTab==="ALL"?"All Leagues":activeTab)+" · "+vis.length+" games";
+  document.getElementById("sb2").textContent=liveN+" live now";
+}
+
+setInterval(function(){loadGames();},60000);
+loadGames();
+</script>
+</body>
+</html>
