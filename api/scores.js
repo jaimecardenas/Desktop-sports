@@ -1,4 +1,6 @@
-const http = require ("html") [
+const https = require("https");
+
+const LEAGUES = [
   ["NHL","hockey","nhl"],["MLB","baseball","mlb"],["NBA","basketball","nba"],
   ["NFL","football","nfl"],["WNBA","basketball","wnba"],["MLS","soccer","usa.1"],
   ["NWSL","soccer","usa.nwsl"],["EPL","soccer","eng.1"],["ENG2","soccer","eng.2"],
@@ -17,68 +19,64 @@ const BROADCAST = {
   NCAAVB:["ESPN","ESPN2","ESPN+"],
 };
 
-function todayStr() {
-  var d = new Date();
-  return d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
 }
 
-function getETDateStr(isoDate) {
-  try {
-    return new Date(isoDate).toLocaleDateString("en-CA", {timeZone:"America/New_York"});
-  } catch(e) { return ""; }
+function getETDate(iso){
+  try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:"America/New_York"});}
+  catch(e){return "";}
 }
 
-function getTodayETStr() {
-  return new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+function todayET(){
+  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
 }
 
-function get(url) {
-  return new Promise(function(resolve) {
-    var req = https.get(url, function(res) {
-      var b = "";
-      res.on("data", function(c) { b += c; });
-      res.on("end", function() { try { resolve(JSON.parse(b)); } catch(e) { resolve(null); } });
+function get(url){
+  return new Promise(function(resolve){
+    var req=https.get(url,function(res){
+      var b="";
+      res.on("data",function(c){b+=c;});
+      res.on("end",function(){try{resolve(JSON.parse(b));}catch(e){resolve(null);}});
     });
-    req.on("error", function() { resolve(null); });
-    req.setTimeout(8000, function() { req.destroy(); resolve(null); });
+    req.on("error",function(){resolve(null);});
+    req.setTimeout(8000,function(){req.destroy();resolve(null);});
   });
 }
 
-module.exports = function(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Cache-Control", "s-maxage=55, stale-while-revalidate=5");
-  var date = todayStr();
-  var todayET = getTodayETStr();
-  var all = [];
-  var done = 0;
-  var total = LEAGUES.length;
-
-  function finish() {
-    all.sort(function(a,b) {
-      var o = {live:0,scheduled:1,final:2};
-      return (o[a.status]!==undefined?o[a.status]:1)-(o[b.status]!==undefined?o[b.status]:1);
+module.exports=function(req,res){
+  res.setHeader("Access-Control-Allow-Origin","*");
+  res.setHeader("Cache-Control","s-maxage=55,stale-while-revalidate=5");
+  var date=todayStr();
+  var today=todayET();
+  var all=[];
+  var done=0;
+  var total=LEAGUES.length;
+  function finish(){
+    all.sort(function(a,b){
+      var o={live:0,scheduled:1,final:2};
+      return(o[a.status]!==undefined?o[a.status]:1)-(o[b.status]!==undefined?o[b.status]:1);
     });
-    res.status(200).json({date:date, games:all});
+    res.status(200).json({date:date,games:all});
   }
-
-  LEAGUES.forEach(function(row) {
-    var url = "https://site.api.espn.com/apis/site/v2/sports/"+row[1]+"/"+row[2]+"/scoreboard?dates="+date+"&limit=100";
-    get(url).then(function(data) {
-      if (data && data.events) {
-        data.events.forEach(function(ev) {
-          try {
-            var gameET = getETDateStr(ev.date);
-            if (gameET && gameET !== todayET) return;
-            var comp = ev.competitions[0] || {};
-            var teams = comp.competitors || [];
-            var away = teams.filter(function(t){return t.homeAway==="away";})[0] || teams[0] || {};
-            var home = teams.filter(function(t){return t.homeAway==="home";})[0] || teams[1] || {};
-            var state = comp.status.type.state || "pre";
-            var et = new Date(ev.date).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/New_York"});
-            var raw = [];
+  LEAGUES.forEach(function(row){
+    get("https://site.api.espn.com/apis/site/v2/sports/"+row[1]+"/"+row[2]+"/scoreboard?dates="+date+"&limit=100").then(function(data){
+      if(data&&data.events){
+        data.events.forEach(function(ev){
+          try{
+            var gd=getETDate(ev.date);
+            if(gd&&gd!==today)return;
+            var comp=ev.competitions[0]||{};
+            var teams=comp.competitors||[];
+            var away=teams.filter(function(t){return t.homeAway==="away";})[0]||teams[0]||{};
+            var home=teams.filter(function(t){return t.homeAway==="home";})[0]||teams[1]||{};
+            var state=comp.status.type.state||"pre";
+            var et=new Date(ev.date).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/New_York"});
+            var raw=[];
             (comp.broadcasts||[]).forEach(function(b){(b.names||[]).forEach(function(n){raw.push(n);});});
             all.push({
-              id:ev.id, sport:row[0],
+              id:ev.id,sport:row[0],
               away:((away.team||{}).abbreviation||"---").slice(0,4).toUpperCase(),
               home:((home.team||{}).abbreviation||"---").slice(0,4).toUpperCase(),
               awayFull:(away.team||{}).displayName||"---",
@@ -90,11 +88,11 @@ module.exports = function(req, res) {
               detail:state==="in"?(comp.status.type.shortDetail||""):"",
               streams:raw.length?raw.slice(0,3):(BROADCAST[row[0]]||[]),
             });
-          } catch(e) {}
+          }catch(e){}
         });
       }
       done++;
-      if (done === total) finish();
+      if(done===total)finish();
     });
   });
 };
