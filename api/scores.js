@@ -1,5 +1,3 @@
-const https = require("https");
-
 const LEAGUES = [
   ["NHL","hockey","nhl"],["MLB","baseball","mlb"],["NBA","basketball","nba"],
   ["NFL","football","nfl"],["WNBA","basketball","wnba"],["MLS","soccer","usa.1"],
@@ -24,13 +22,14 @@ function todayStr() {
   return d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
 }
 
-function todayET() {
-  return new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+function getETDateStr(isoDate) {
+  try {
+    return new Date(isoDate).toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+  } catch(e) { return ""; }
 }
 
-function gameIsToday(isoDate) {
-  var gameDate = new Date(isoDate).toLocaleDateString("en-CA", {timeZone:"America/New_York"});
-  return gameDate === todayET();
+function getTodayETStr() {
+  return new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
 }
 
 function get(url) {
@@ -49,6 +48,7 @@ module.exports = function(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cache-Control", "s-maxage=55, stale-while-revalidate=5");
   var date = todayStr();
+  var todayET = getTodayETStr();
   var all = [];
   var done = 0;
   var total = LEAGUES.length;
@@ -67,7 +67,8 @@ module.exports = function(req, res) {
       if (data && data.events) {
         data.events.forEach(function(ev) {
           try {
-          
+            var gameET = getETDateStr(ev.date);
+            if (gameET && gameET !== todayET) return;
             var comp = ev.competitions[0] || {};
             var teams = comp.competitors || [];
             var away = teams.filter(function(t){return t.homeAway==="away";})[0] || teams[0] || {};
