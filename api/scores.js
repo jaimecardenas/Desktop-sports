@@ -67,7 +67,7 @@ module.exports = function(req, res) {
       if (data && data.events) {
         data.events.forEach(function(ev) {
           try {
-            if (!gameIsToday(ev.date)) return;
+          
             var comp = ev.competitions[0] || {};
             var teams = comp.competitors || [];
             var away = teams.filter(function(t){return t.homeAway==="away";})[0] || teams[0] || {};
