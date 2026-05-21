@@ -1,4 +1,4 @@
-const LEAGUES = [
+const http = require ("html") [
   ["NHL","hockey","nhl"],["MLB","baseball","mlb"],["NBA","basketball","nba"],
   ["NFL","football","nfl"],["WNBA","basketball","wnba"],["MLS","soccer","usa.1"],
   ["NWSL","soccer","usa.nwsl"],["EPL","soccer","eng.1"],["ENG2","soccer","eng.2"],
