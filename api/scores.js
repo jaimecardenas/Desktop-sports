@@ -19,18 +19,18 @@ const BROADCAST = {
   NCAAVB:["ESPN","ESPN2","ESPN+"],
 };
 
+// All date operations use ET timezone — fixes the UTC midnight bug permanently
 function todayStr(){
-  var d=new Date();
-  return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"}).replace(/-/g,"");
+}
+
+function todayET(){
+  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
 }
 
 function getETDate(iso){
   try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:"America/New_York"});}
   catch(e){return "";}
-}
-
-function todayET(){
-  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
 }
 
 function get(url){
@@ -96,3 +96,5 @@ module.exports=function(req,res){
     });
   });
 };
+
+           
