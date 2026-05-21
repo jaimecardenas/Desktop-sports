@@ -24,14 +24,21 @@ function todayStr() {
   return d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
 }
 
+function todayET() {
+  return new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+}
+
+function gameIsToday(isoDate) {
+  var gameDate = new Date(isoDate).toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+  return gameDate === todayET();
+}
+
 function get(url) {
   return new Promise(function(resolve) {
     var req = https.get(url, function(res) {
       var b = "";
       res.on("data", function(c) { b += c; });
-      res.on("end", function() {
-        try { resolve(JSON.parse(b)); } catch(e) { resolve(null); }
-      });
+      res.on("end", function() { try { resolve(JSON.parse(b)); } catch(e) { resolve(null); } });
     });
     req.on("error", function() { resolve(null); });
     req.setTimeout(8000, function() { req.destroy(); resolve(null); });
@@ -49,19 +56,18 @@ module.exports = function(req, res) {
   function finish() {
     all.sort(function(a,b) {
       var o = {live:0,scheduled:1,final:2};
-      var oa = o[a.status] !== undefined ? o[a.status] : 1;
-      var ob = o[b.status] !== undefined ? o[b.status] : 1;
-      return oa - ob;
+      return (o[a.status]!==undefined?o[a.status]:1)-(o[b.status]!==undefined?o[b.status]:1);
     });
     res.status(200).json({date:date, games:all});
   }
 
   LEAGUES.forEach(function(row) {
-    var url = "https://site.api.espn.com/apis/site/v2/sports/" + row[1] + "/" + row[2] + "/scoreboard?dates=" + date + "&limit=100";
+    var url = "https://site.api.espn.com/apis/site/v2/sports/"+row[1]+"/"+row[2]+"/scoreboard?dates="+date+"&limit=100";
     get(url).then(function(data) {
       if (data && data.events) {
         data.events.forEach(function(ev) {
           try {
+            if (!gameIsToday(ev.date)) return;
             var comp = ev.competitions[0] || {};
             var teams = comp.competitors || [];
             var away = teams.filter(function(t){return t.homeAway==="away";})[0] || teams[0] || {};
@@ -71,17 +77,17 @@ module.exports = function(req, res) {
             var raw = [];
             (comp.broadcasts||[]).forEach(function(b){(b.names||[]).forEach(function(n){raw.push(n);});});
             all.push({
-              id: ev.id, sport: row[0],
-              away: ((away.team||{}).abbreviation||"---").slice(0,4).toUpperCase(),
-              home: ((home.team||{}).abbreviation||"---").slice(0,4).toUpperCase(),
-              awayFull: (away.team||{}).displayName||"---",
-              homeFull: (home.team||{}).displayName||"---",
-              et: et,
-              status: state==="in"?"live":state==="post"?"final":"scheduled",
-              as: state!=="pre" ? String(away.score!=null?away.score:"") : "",
-              hs: state!=="pre" ? String(home.score!=null?home.score:"") : "",
-              detail: state==="in" ? (comp.status.type.shortDetail||"") : "",
-              streams: raw.length ? raw.slice(0,3) : (BROADCAST[row[0]]||[]),
+              id:ev.id, sport:row[0],
+              away:((away.team||{}).abbreviation||"---").slice(0,4).toUpperCase(),
+              home:((home.team||{}).abbreviation||"---").slice(0,4).toUpperCase(),
+              awayFull:(away.team||{}).displayName||"---",
+              homeFull:(home.team||{}).displayName||"---",
+              et:et,
+              status:state==="in"?"live":state==="post"?"final":"scheduled",
+              as:state!=="pre"?String(away.score!=null?away.score:""):"",
+              hs:state!=="pre"?String(home.score!=null?home.score:""):"",
+              detail:state==="in"?(comp.status.type.shortDetail||""):"",
+              streams:raw.length?raw.slice(0,3):(BROADCAST[row[0]]||[]),
             });
           } catch(e) {}
         });
