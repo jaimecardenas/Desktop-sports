@@ -19,29 +19,31 @@ const BROADCAST = {
   NCAAVB:["ESPN","ESPN2","ESPN+"],
 };
 
-// All date operations use ET timezone — fixes the UTC midnight bug permanently
 function todayStr(){
   return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"}).replace(/-/g,"");
 }
 
-function todayET(){
-  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
-}
-
-function getETDate(iso){
-  try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:"America/New_York"});}
-  catch(e){return "";}
-}
-
 function get(url){
   return new Promise(function(resolve){
-    var req=https.get(url,function(res){
+    var options={
+      hostname:"site.api.espn.com",
+      path:url,
+      headers:{
+        "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept":"application/json",
+        "Accept-Language":"en-US,en;q=0.9",
+        "Referer":"https://www.espn.com/",
+        "Origin":"https://www.espn.com"
+      },
+      timeout:10000
+    };
+    var req=https.get(options,function(res){
       var b="";
       res.on("data",function(c){b+=c;});
       res.on("end",function(){try{resolve(JSON.parse(b));}catch(e){resolve(null);}});
     });
     req.on("error",function(){resolve(null);});
-    req.setTimeout(8000,function(){req.destroy();resolve(null);});
+    req.setTimeout(10000,function(){req.destroy();resolve(null);});
   });
 }
 
@@ -49,10 +51,10 @@ module.exports=function(req,res){
   res.setHeader("Access-Control-Allow-Origin","*");
   res.setHeader("Cache-Control","s-maxage=55,stale-while-revalidate=5");
   var date=todayStr();
-  var today=todayET();
   var all=[];
   var done=0;
   var total=LEAGUES.length;
+
   function finish(){
     all.sort(function(a,b){
       var o={live:0,scheduled:1,final:2};
@@ -60,12 +62,13 @@ module.exports=function(req,res){
     });
     res.status(200).json({date:date,games:all});
   }
+
   LEAGUES.forEach(function(row){
-    get("https://site.api.espn.com/apis/site/v2/sports/"+row[1]+"/"+row[2]+"/scoreboard?dates="+date+"&limit=100").then(function(data){
+    var path="/apis/site/v2/sports/"+row[1]+"/"+row[2]+"/scoreboard?dates="+date+"&limit=100";
+    get(path).then(function(data){
       if(data&&data.events){
         data.events.forEach(function(ev){
           try{
-           
             var comp=ev.competitions[0]||{};
             var teams=comp.competitors||[];
             var away=teams.filter(function(t){return t.homeAway==="away";})[0]||teams[0]||{};
@@ -95,5 +98,3 @@ module.exports=function(req,res){
     });
   });
 };
-
-           
