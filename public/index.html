@@ -114,9 +114,9 @@ html,body{height:100%;background:#008080;font-family:'VT323',monospace;overflow:
   </div>
 </div>
 <script>
-var SBG={NHL:"#003380",MLB:"#c0001a",NBA:"#b8460a",NFL:"#1a3a70",MLS:"#005293",EPL:"#3d0099",ENG2:"#1a3d8a",LALIGA:"#c8000a",UCL:"#0a2060",LIGAMX:"#006847",LIGAEX:"#004030",ARG1:"#4a8ac0",WNBA:"#552299",PWHL:"#500055",NWSL:"#004080",MLV:"#8b0057",MLR:"#8b2000",NCAAVB:"#1a3d8a","USL-C":"#1a5c1a","USL-1":"#2a7a2a","USL-2":"#3a903a","USL-W":"#7a1a6a"};
+var SBG={NHL:"#003380",MLB:"#c0001a",NBA:"#b8460a",NFL:"#1a3a70",MLS:"#005293",EPL:"#3d0099",ENG2:"#1a3d8a",LALIGA:"#c8000a",UCL:"#0a2060",LIGAEX:"#004030",ARG1:"#4a8ac0",WNBA:"#552299",PWHL:"#500055",NWSL:"#004080",MLV:"#8b0057",MLR:"#8b2000","NCAA VB":"#1a3d8a"};
 var SCLR={"ESPN+":"#c53000","ESPN":"#cc0000","ESPN2":"#cc0000","TNT":"#5500aa","Max":"#3300cc","ABC":"#003399","Apple TV":"#111","Peacock":"#d07000","USA Net":"#1a6aaa","Prime Video":"#0077bb","MLB.TV":"#002b6e","NHL Net":"#002b6e","Fox":"#cc2200","FOX":"#cc2200","CBS":"#003399","NBC":"#aa6a00","TBS":"#007070","Victory+":"#1a4020","CBS Sports":"#003399","Univision":"#0033aa","TUDN":"#cc0022","ViX":"#1a8a3a","ESPN Deportes":"#cc3300","TyC Sports":"#0a4a8a","Paramount+":"#1a5cb8"};
-var TABS=[{k:"ALL",l:"All"},{k:"NHL",l:"NHL"},{k:"MLB",l:"MLB"},{k:"NBA",l:"NBA"},{k:"NFL",l:"NFL"},{k:"PWHL",l:"PWHL"},{k:"NWSL",l:"NWSL"},{k:"WNBA",l:"WNBA"},{k:"MLV",l:"MLV"},{k:"MLR",l:"MLR"},{k:"NCAAVB",l:"NCAA VB"},{k:"MLS",l:"MLS"},{k:"USL-C",l:"USL-C"},{k:"USL-1",l:"USL-1"},{k:"USL-2",l:"USL-2"},{k:"USL-W",l:"USL-W"},{k:"EPL",l:"EPL"},{k:"ENG2",l:"ENG 2"},{k:"UCL",l:"Champ.L"},{k:"LALIGA",l:"La Liga"},{k:"LIGAMX",l:"Liga MX"},{k:"LIGAEX",l:"Liga Exp"},{k:"ARG1",l:"Argentina"}];
+var TABS=[{k:"ALL",l:"All"},{k:"NHL",l:"NHL"},{k:"MLB",l:"MLB"},{k:"NBA",l:"NBA"},{k:"NFL",l:"NFL"},{k:"PWHL",l:"PWHL"},{k:"NWSL",l:"NWSL"},{k:"WNBA",l:"WNBA"},{k:"MLV",l:"MLV"},{k:"MLR",l:"MLR"},{k:"NCAA VB",l:"NCAA VB"},{k:"MLS",l:"MLS"},{k:"EPL",l:"EPL"},{k:"ENG2",l:"EFL Champ"},{k:"UCL",l:"Champ.L"},{k:"LALIGA",l:"La Liga"},{k:"LIGAEX",l:"Liga Exp"},{k:"ARG1",l:"Argentina"}];
 var games=[],activeTab="ALL";
 
 setInterval(function(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});},1000);
